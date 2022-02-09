@@ -3565,11 +3565,15 @@ barPlot <- function (data = NULL, net.amo = FALSE, contributions = FALSE,
     
     reason.data <- melt(reason.data, vars = "Net Amortization: Contributions Above/Below Interest on Unfunded Liabilities")
     
-    reason.data <- data.frame(reason.data[22:84, ])
-    x <- data.table(seq(2001, 2020, by = 1))
+    reason.data <- data.frame(reason.data)
+
+    x <- data.table(seq(2001, 2021, by = 1))
     x <- rbind(x, x, x)
     reason.data <- cbind(x, reason.data)
     reason.data <- data.frame(reason.data)
+    reason.data <- reason.data[22:84,]
+
+    
     graph <- ggplot(reason.data, aes(x = V1, y = value, 
       fill = variable)) + geom_bar(stat = "identity", 
       position = position_dodge(width = 0.9), width = 0.8) + 
@@ -3803,7 +3807,7 @@ reason.data <- data.table(reason.data)
 ## Make sure all column numbers are numeric
 reason.data[,4:(length(reason.data)-1)] <- data.table(reason.data[,4:(length(reason.data)-1)]) %>% dplyr::mutate_all(as.numeric)
 reason.data$year <- as.numeric(reason.data$year)
-reason.data$contribution_rate_effective_fy[1:5] <- 2002:2006
+#reason.data$contribution_rate_effective_fy[1:5] <- 2002:2006
 reason.data$fiscal_year_of_contribution <- reason.data$contribution_rate_effective_fy
 
 #View(reason.data$contribution_rate_effective_fy)
@@ -3817,11 +3821,14 @@ reason.data$fiscal_year_of_contribution <- reason.data$contribution_rate_effecti
 future.payroll <- reason.data[year >= fiscal_year_of_contribution[1]]$covered_payroll_dollar
 future.payroll <- t(cbind(t(future.payroll),reason.data[year == 2021]$covered_payroll_dollar*(1+0.03)))#Use assumed payroll growth rate
 reason.data$payroll2 <- future.payroll
+reason.data$total_amortization_payment_percentage[21] <- 0.1563
+
 ### Calculating Total Normal Cost $ amount
 reason.data$total_nc <-
 reason.data$total_normal_cost_percentage * reason.data$covered_payroll_dollar
 reason.data <- reason.data %>% replace(is.na(.), 0)
 
+#View(reason.data)
 reason.data$interest_on_debt_dollar[5] <-465365041
 #Calculating 2005 Interest on Debt
 # reason.data$interest_on_debt_dollar[5] <- as.numeric(
